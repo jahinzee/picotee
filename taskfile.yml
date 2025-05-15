@@ -1,0 +1,27 @@
+version: '3'
+
+tasks:
+  build-image:
+    dir: '{{.USER_WORKING_DIR}}'
+    preconditions:
+      - command -v bluebuild
+    cmds:
+      - bluebuild build recipes/recipe.yml
+  
+  build-iso:
+    dir: '{{.USER_WORKING_DIR}}'
+    preconditions:
+      - command -v bluebuild
+    cmds:
+      
+      # Create a local build directory -- this cannot be in the default /tmp
+      # directory for some reason
+      - mkdir -p ./.build
+      - mkdir -p ./.output
+      
+      # Using `which` because cargo and distrobox installs of bluebuild may
+      # not plop it somewhere root can access -- and yes it has to be root
+      - sudo $(which bluebuild) generate-iso -V kinoite --tempdir .build --iso-name .output/picotee.iso recipe recipes/recipe.yml
+
+      # Clear the build files
+      - rm -r ./.build
